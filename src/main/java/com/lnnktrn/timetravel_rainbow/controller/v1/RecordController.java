@@ -29,7 +29,7 @@ public class RecordController {
             @PathVariable @Min(1) Long id
     ) {
         var entity = recordService.getLatestRecord(id);
-        return ResponseEntity.ok(EntityToDtoMapper.map(entity));
+        return ResponseEntity.ok(EntityToDtoMapper.mapRecordEntityToRecorDto(entity));
     }
 
     /**

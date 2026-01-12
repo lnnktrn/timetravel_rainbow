@@ -49,7 +49,7 @@ class RecordVersionControllerTest {
         mockMvc.perform(get("/api/v2/records/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.data").value(body))
+                .andExpect(jsonPath("$.data.a").value(1))
                 .andExpect(jsonPath("$.version").value(version))
                 .andExpect(jsonPath("$.createdAt").value(createdAt.toString()))
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
@@ -78,7 +78,7 @@ class RecordVersionControllerTest {
                         .param("version", String.valueOf(version)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.data").value(body))
+                .andExpect(jsonPath("$.data.a").value(1))
                 .andExpect(jsonPath("$.version").value(version))
                 .andExpect(jsonPath("$.createdAt").value(createdAt.toString()))
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));

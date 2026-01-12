@@ -45,9 +45,7 @@ class RecordControllerTest {
         mockMvc.perform(get("/api/v1/records/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.data").value(body))
-                .andExpect(jsonPath("$.version").value(version))
-                .andExpect(jsonPath("$.createdAt").value(createdAt.toString()))
+                .andExpect(jsonPath("$.data.a").value(1))
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
         verify(recordService).getLatestRecord(id);

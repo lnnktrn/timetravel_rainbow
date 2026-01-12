@@ -1,10 +1,8 @@
 package com.lnnktrn.timetravel_rainbow.dto;
 
-import java.time.Instant;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public record RecordDto(
         Long id,
-        Long version,
-        String data,
-        Instant createdAt
+        JsonNode data
 ){}

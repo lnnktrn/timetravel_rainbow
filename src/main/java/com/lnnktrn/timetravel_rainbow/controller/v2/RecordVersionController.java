@@ -2,6 +2,7 @@ package com.lnnktrn.timetravel_rainbow.controller.v2;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.lnnktrn.timetravel_rainbow.dto.RecordDto;
+import com.lnnktrn.timetravel_rainbow.dto.RecordVersionDto;
 import com.lnnktrn.timetravel_rainbow.mapper.EntityToDtoMapper;
 import com.lnnktrn.timetravel_rainbow.service.RecordService;
 import jakarta.validation.constraints.Min;
@@ -28,7 +29,7 @@ public class RecordVersionController {
      */
     // GET /api/v2/records/{id}?version={version}
     @GetMapping("/{id}")
-    public ResponseEntity<RecordDto> getLatestOrByVersion(
+    public ResponseEntity<RecordVersionDto> getLatestOrByVersion(
             @PathVariable @Min(1) Long id,
             @RequestParam(required = false) @Min(1) Long version
     ) {
@@ -36,7 +37,7 @@ public class RecordVersionController {
                 ? recordService.getLatestRecord(id)
                 : recordService.getRecord(id, version);
 
-        return ResponseEntity.ok(EntityToDtoMapper.map(entity));
+        return ResponseEntity.ok(EntityToDtoMapper.mapRecorEntityToRecorVersionDto(entity));
     }
 
     /**
@@ -48,9 +49,9 @@ public class RecordVersionController {
      */
     // GET /api/v2/records/{id}/history
     @GetMapping(value = "/{id}/history")
-    public ResponseEntity<List<RecordDto>> listVersions(@PathVariable @Min(1) Long id) {
+    public ResponseEntity<List<RecordVersionDto>> listVersions(@PathVariable @Min(1) Long id) {
         var records = recordService.listVersions(id);
-        var dtos = records.stream().map(EntityToDtoMapper::map).toList();
+        var dtos = records.stream().map(EntityToDtoMapper::mapRecorEntityToRecorVersionDto).toList();
         return ResponseEntity.ok(dtos);
     }
 
