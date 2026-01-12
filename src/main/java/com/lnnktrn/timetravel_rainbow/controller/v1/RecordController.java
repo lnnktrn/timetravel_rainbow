@@ -22,9 +22,9 @@ public class RecordController {
     /**
      * Get the latest record version by given id.
      *
-     * @param id      - record id
+     * @param id - record id
      * @return record if record exists, 404 otherwise
-     * If id<0 returns 400
+     * @response 400 Bad Request if id<=0
      */
     @GetMapping("/{id}")
     public ResponseEntity<RecordDto> getRecord(
@@ -38,8 +38,9 @@ public class RecordController {
      * Creates a new version of a record with given record data.
      * If a record does not exist, it will be created with version 1.
      *
-     * @param id      - record id
+     * @param id   - record id
      * @param data - record data
+     * @response 400 Bad Request if id<=0
      */
     @PostMapping("/{id}")
     public ResponseEntity<RecordDto> upsertRecord(

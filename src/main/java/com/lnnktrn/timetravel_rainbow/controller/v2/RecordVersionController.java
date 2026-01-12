@@ -25,20 +25,18 @@ public class RecordVersionController {
 
     /**
      * Get record by given id.
-     *  By default, returns the latest version of the record.
-     *  Optionally, a specific version or the state of the record at a given moment in time
-     *  can be requested using query parameters.
-     *
-     *  GET /api/v2/records/{id} – returns the latest version</li>
-     *  GET /api/v2/records/{id}?version={version} – returns a specific version</li>
-     *  GET /api/v2/records/{id}?at={timestamp} – returns the version valid at the given moment</li>
+     * By default, returns the latest version of the record.
+     * Optionally, a specific version or the state of the record at a given moment in time
+     * can be requested using query parameters.
+     * <p>
+     * GET /api/v2/records/{id} – returns the latest version
+     * GET /api/v2/records/{id}?version={version} – returns a specific version
+     * GET /api/v2/records/{id}?at={timestamp} – returns the version valid at the given moment
      *
      * @param id      - record id
      * @param version (optional) - the exact version of the record to retrieve; must be greater than or equal to 1
-     * @param at (optional) - the point in time for which the record state should be returned; must not be used together with version
-     *
+     * @param at      (optional) - the point in time for which the record state should be returned; must not be used together with version
      * @throws IllegalArgumentException if both version and at parameters are provided
-     *
      * @response 200 OK if the record (or requested version) exists
      * @response 400 Bad Request if request parameters are invalid or mutually exclusive
      * @response 404 Not Found if the record does not exist at the requested time or version
@@ -72,7 +70,7 @@ public class RecordVersionController {
      *
      * @param id - record id
      * @return List of records if records exist, 404 otherwise
-     * If id<0 returns 400
+     * @response 400 Bad Request if id<=0
      */
     // GET /api/v2/records/{id}/history
     @GetMapping(value = "/{id}/history")
@@ -86,8 +84,9 @@ public class RecordVersionController {
      * Creates a new version of a record with given record data.
      * If a record does not exist, it will be created with version 1.
      *
-     * @param id      - record id
+     * @param id   - record id
      * @param data - record data
+     * @response 400 Bad Request if id<=0
      */
     // Apply updates to the latest version while preserving history
     // POST /api/v2/records/{id}
