@@ -1,6 +1,8 @@
 package com.lnnktrn.timetravel_rainbow.controller.v1;
 
+import com.lnnktrn.timetravel_rainbow.dto.RecordDto;
 import com.lnnktrn.timetravel_rainbow.entity.RecordEntity;
+import com.lnnktrn.timetravel_rainbow.mapper.EntityToDtoMapper;
 import com.lnnktrn.timetravel_rainbow.service.RecordService;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +18,11 @@ public class RecordController {
     private RecordService recordService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<RecordEntity> getRecord(
+    public ResponseEntity<RecordDto> getRecord(
             @PathVariable @Min(1) Long id
     ) {
         var entity = recordService.getRecord(id);
-        return ResponseEntity.ok(entity);
+        return ResponseEntity.ok(EntityToDtoMapper.map(entity));
     }
 
     @PostMapping("/{id}")
