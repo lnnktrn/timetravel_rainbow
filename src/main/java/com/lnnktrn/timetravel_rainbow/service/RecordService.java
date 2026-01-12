@@ -2,6 +2,7 @@ package com.lnnktrn.timetravel_rainbow.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lnnktrn.timetravel_rainbow.dto.RecordVersionDto;
 import com.lnnktrn.timetravel_rainbow.entity.LatestVersionEntity;
 import com.lnnktrn.timetravel_rainbow.entity.RecordEntity;
 import com.lnnktrn.timetravel_rainbow.entity.RecordId;
@@ -45,19 +46,36 @@ public class RecordService {
         return entities;
     }
 
-    public void upsertRecord(Long id, JsonNode data) {
-        var baseData = objectMapper.createObjectNode();
-        RecordEntity existingRecord = recordRepository.findById(RecordId.builder().id(id).build())
-                .orElseGet(() -> RecordEntity.builder()
-                        .recordId(RecordId.builder().id(id).version(1L).build()).data(baseData)
-                        .build());
-        JsonNode newData = jsonMergePatchUtil.applyMergePatch(existingRecord.getData(), data);
-        existingRecord.setData(newData);
-        recordRepository.save(existingRecord);
-        latestVersionRepository.save(LatestVersionEntity.builder()
-                        .id(existingRecord.getRecordId().getId())
-                        .version(existingRecord.getRecordId().getVersion())
-                .build());
+    public RecordEntity upsertRecord(Long id, JsonNode patch) {
+        var latestOpt = latestVersionRepository.findByIdForUpdate(id);
+
+        long newVersion;
+        JsonNode baseData;
+        LatestVersionEntity latest;
+
+        if (latestOpt.isPresent()) {
+            latest = latestOpt.get();
+            baseData = getRecord(id, latest.getVersion()).getData();
+            newVersion = latest.getVersion() + 1;
+        } else {
+            baseData = objectMapper.createObjectNode();
+            newVersion = 1;
+            latest = LatestVersionEntity.builder().id(id).version(newVersion).build();
+        }
+
+        JsonNode newData = jsonMergePatchUtil.applyMergePatch(baseData, patch);
+
+        var saved = recordRepository.save(
+                RecordEntity.builder()
+                        .recordId(RecordId.builder().id(id).version(newVersion).build())
+                        .data(newData)
+                        .build()
+        );
+
+        latest.setVersion(newVersion);
+        latestVersionRepository.save(latest);
+
+        return saved;
     }
 
 }

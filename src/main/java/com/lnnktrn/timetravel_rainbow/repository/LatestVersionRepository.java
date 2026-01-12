@@ -22,4 +22,8 @@ public interface LatestVersionRepository extends JpaRepository<LatestVersionEnti
             """)
     Optional<RecordEntity> findLatestRecordById(Long id);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select l from LatestVersionEntity l where l.id = :id")
+    Optional<LatestVersionEntity> findByIdForUpdate(@Param("id") Long id);
+
 }

@@ -57,15 +57,17 @@ class RecordControllerTest {
         long id = 1L;
         String body = "{\"a\":1}";
         ObjectNode node = recordUtil.makeJsonNode(body);
+        var entity = recordUtil.makeEntity(id, 1L, body, Instant.now());
+
+        when(recordService.upsertRecord(id, node)).thenReturn(entity);
 
         mockMvc.perform(post("/api/v1/records/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
-                .andExpect(content().string("")); // Void body
-
-        verify(recordService).upsertRecord(id, node);
-        verifyNoMoreInteractions(recordService);
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.data.a").value(1))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
     }
 
     @Test

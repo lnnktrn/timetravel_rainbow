@@ -40,11 +40,12 @@ public class RecordController {
      * @param data - record data
      */
     @PostMapping("/{id}")
-    public ResponseEntity<Void> upsertRecord(
+    public ResponseEntity<RecordDto> upsertRecord(
             @PathVariable @Min(1) Long id,
             @RequestBody JsonNode data
     ) {
-        recordService.upsertRecord(id, data);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        var entity = recordService.upsertRecord(id, data);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(EntityToDtoMapper.mapRecordEntityToRecorDto(entity));
     }
 }
