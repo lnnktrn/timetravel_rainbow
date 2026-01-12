@@ -6,6 +6,7 @@ import com.lnnktrn.timetravel_rainbow.entity.LatestVersionEntity;
 import com.lnnktrn.timetravel_rainbow.entity.RecordEntity;
 import com.lnnktrn.timetravel_rainbow.entity.RecordId;
 import com.lnnktrn.timetravel_rainbow.exception.NoSuchRecordException;
+import com.lnnktrn.timetravel_rainbow.json.JsonMergePatchUtil;
 import com.lnnktrn.timetravel_rainbow.repository.LatestVersionRepository;
 import com.lnnktrn.timetravel_rainbow.repository.RecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ public class RecordService {
     private LatestVersionRepository latestVersionRepository;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private JsonMergePatchUtil jsonMergePatchUtil;
 
     public RecordEntity getLatestRecord(Long id) {
         return latestVersionRepository.findLatestRecordById(id)
@@ -48,7 +51,8 @@ public class RecordService {
                 .orElseGet(() -> RecordEntity.builder()
                         .recordId(RecordId.builder().id(id).version(1L).build()).data(baseData)
                         .build());
-        existingRecord.setData(data);
+        JsonNode newData = jsonMergePatchUtil.applyMergePatch(existingRecord.getData(), data);
+        existingRecord.setData(newData);
         recordRepository.save(existingRecord);
         latestVersionRepository.save(LatestVersionEntity.builder()
                         .id(existingRecord.getRecordId().getId())
