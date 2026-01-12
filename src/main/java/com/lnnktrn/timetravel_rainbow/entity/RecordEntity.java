@@ -1,10 +1,10 @@
 package com.lnnktrn.timetravel_rainbow.entity;
 
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.Instant;
 
 @Entity
 @Table(name = "records")
@@ -14,9 +14,11 @@ import lombok.*;
 @Getter
 @Setter
 public class RecordEntity {
+    @EmbeddedId
+    private RecordId recordId;
+    private String data;
 
-    @Id
-    Long id;
-
-    String data;
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
 }

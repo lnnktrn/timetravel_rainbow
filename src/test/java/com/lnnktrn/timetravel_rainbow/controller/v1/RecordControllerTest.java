@@ -1,6 +1,7 @@
 package com.lnnktrn.timetravel_rainbow.controller.v1;
 
 import com.lnnktrn.timetravel_rainbow.entity.RecordEntity;
+import com.lnnktrn.timetravel_rainbow.entity.RecordId;
 import com.lnnktrn.timetravel_rainbow.exception.NoSuchRecordException;
 import com.lnnktrn.timetravel_rainbow.service.RecordService;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class RecordControllerTest {
         long id = 1L;
         String body = "{\"a\":1}";
 
-        RecordEntity entity = RecordEntity.builder().id(id).data(body).build();
+        RecordEntity entity = RecordEntity.builder().recordId(RecordId.builder().id(id).build()).data(body).build();
 
         when(recordService.getRecord(id)).thenReturn(entity);
 
