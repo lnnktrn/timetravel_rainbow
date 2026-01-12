@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -94,6 +95,55 @@ class RecordVersionControllerTest {
     void getLatestOrByVersion_shouldReturn400_whenVersionIsZero_ifMethodValidationEnabled() throws Exception {
         mockMvc.perform(get("/api/v2/records/{id}", 1L)
                         .param("version", "0"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(recordService);
+    }
+
+    @Test
+    void listVersions_shouldReturn200_andJsonArray() throws Exception {
+        long id = 1L;
+
+        RecordEntity e1 = RecordEntity.builder().recordId(
+                        RecordId.builder().id(id).build())
+                .data("{}")
+                .build();
+        RecordEntity e2 = RecordEntity.builder().recordId(
+                        RecordId.builder().id(id).build())
+                .data("{}")
+                .build();
+
+        when(recordService.listVersions(id)).thenReturn(List.of(e1, e2));
+
+        mockMvc.perform(get("/api/v2/records/{id}/history", id))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2));
+
+        verify(recordService).listVersions(id);
+        verifyNoMoreInteractions(recordService);
+    }
+
+    @Test
+    void listVersions_shouldReturn200_andEmptyArray_whenNoVersions() throws Exception {
+        long id = 1L;
+
+        when(recordService.listVersions(id)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v2/records/{id}/history", id))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+
+        verify(recordService).listVersions(id);
+        verifyNoMoreInteractions(recordService);
+    }
+
+    @Test
+    void listVersions_shouldReturn400_whenIdIsZero_ifMethodValidationEnabled() throws Exception {
+        mockMvc.perform(get("/api/v2/records/{id}/history", 0L))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(recordService);

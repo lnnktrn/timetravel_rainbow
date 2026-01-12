@@ -16,6 +16,13 @@ public class RecordController {
     @Autowired
     private RecordService recordService;
 
+    /**
+     * Get the latest record version by given id.
+     *
+     * @param id      - record id
+     * @return record if record exists, 404 otherwise
+     * If id<0 returns 400
+     */
     @GetMapping("/{id}")
     public ResponseEntity<RecordDto> getRecord(
             @PathVariable @Min(1) Long id
@@ -24,6 +31,13 @@ public class RecordController {
         return ResponseEntity.ok(EntityToDtoMapper.map(entity));
     }
 
+    /**
+     * Creates a new version of a record with given record data.
+     * If a record does not exist, it will be created with version 1.
+     *
+     * @param id      - record id
+     * @param data - record data
+     */
     @PostMapping("/{id}")
     public ResponseEntity<Void> upsertRecord(
             @PathVariable @Min(1) Long id,

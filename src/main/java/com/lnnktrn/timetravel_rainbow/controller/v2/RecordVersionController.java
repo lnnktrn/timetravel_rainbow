@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v2/records")
 public class RecordVersionController {
@@ -19,7 +21,8 @@ public class RecordVersionController {
      *
      * @param id      - record id
      * @param version (optional) - record version. If not empty, then returns a specific version of a record. If empty - returns latest version.
-     * @return entityDto if record exists, 404 otherwise
+     * @return record if record exists, 404 otherwise
+     * If id<0 or version<0 returns 400
      */
     // GET /api/v2/records/{id}?version={version}
     @GetMapping("/{id}")
@@ -33,4 +36,20 @@ public class RecordVersionController {
 
         return ResponseEntity.ok(EntityToDtoMapper.map(entity));
     }
+
+    /**
+     * Get all record versions for given id.
+     *
+     * @param id - record id
+     * @return List of records if records exist, 404 otherwise
+     * If id<0 returns 400
+     */
+    // GET /api/v2/records/{id}/history
+    @GetMapping(value = "/{id}/history")
+    public ResponseEntity<List<RecordDto>> listVersions(@PathVariable @Min(1) Long id) {
+        var records = recordService.listVersions(id);
+        var dtos = records.stream().map(EntityToDtoMapper::map).toList();
+        return ResponseEntity.ok(dtos);
+    }
+
 }

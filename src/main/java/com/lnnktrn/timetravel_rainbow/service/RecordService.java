@@ -9,6 +9,8 @@ import com.lnnktrn.timetravel_rainbow.repository.RecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class RecordService {
 
@@ -26,6 +28,14 @@ public class RecordService {
         RecordId recordId = RecordId.builder().id(id).version(version).build();
         return recordRepository.findById(recordId)
                 .orElseThrow(() -> new NoSuchRecordException(id, version));
+    }
+
+    public List<RecordEntity> listVersions(Long id) {
+        List<RecordEntity> entities = recordRepository.findAllByRecordId_IdOrderByRecordId_VersionAsc(id);
+        if (entities.isEmpty()) {
+            throw new NoSuchRecordException(id);
+        }
+        return entities;
     }
 
     public void upsertRecord(Long id, String data) {
