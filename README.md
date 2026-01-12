@@ -26,6 +26,7 @@ Returns the latest version of the record with the given id.
 #### Responses
 * 200 OK — record found
 * 404 Not Found — record does not exist
+* 400 Bad request - id < 1
 
 ### Create a new version of a record (JSON Merge Patch)
 ```http
@@ -49,6 +50,7 @@ Updates are applied using JSON Merge Patch semantics:
 ```
 #### Responses
 * 200 OK — returns the newly created record version
+* 400 Bad request - id < 1
 
 
 ## API endpoints v2
@@ -61,6 +63,7 @@ Returns the latest version of the record with the given id.
 #### Responses
 * 200 OK — record found
 * 404 Not Found — record does not exist
+* 400 Bad request - id < 1
 
 ### Get a specific version of a record
 ```http
@@ -84,6 +87,7 @@ Returns all versions of the record, sorted by version in ascending order.
 #### Responses
 * 200 OK — list of record versions
 * 404 Not Found — record does not exist
+* 400 Bad request - id < 1
 
 ### Create a new version of a record (JSON Merge Patch)
 ```http
@@ -107,3 +111,4 @@ Updates are applied using JSON Merge Patch semantics:
 ```
 #### Responses
 * 200 OK — returns the newly created record version
+* 400 Bad request - id < 1
