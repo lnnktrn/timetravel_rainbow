@@ -86,7 +86,7 @@ class RecordVersionControllerTest {
     }
 
     @Test
-    void getLatestOrByVersion_shouldReturn400_whenIdIsZero_ifMethodValidationEnabled() throws Exception {
+    void getRecord_shouldReturn400_whenIdIsZero_ifMethodValidationEnabled() throws Exception {
         mockMvc.perform(get("/api/v2/records/{id}", 0L))
                 .andExpect(status().isBadRequest());
 
@@ -94,7 +94,7 @@ class RecordVersionControllerTest {
     }
 
     @Test
-    void getLatestOrByVersion_shouldReturn400_whenVersionIsZero_ifMethodValidationEnabled() throws Exception {
+    void getRecordIsZero_ifMethodValidationEnabled() throws Exception {
         mockMvc.perform(get("/api/v2/records/{id}", 1L)
                         .param("version", "0"))
                 .andExpect(status().isBadRequest());

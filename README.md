@@ -64,14 +64,16 @@ Returns the latest version of the record with the given id.
 
 ### Get a specific version of a record
 ```http
-GET /api/v2/records/{id}?version={version}
+GET /api/v2/records/{id}?version={version}&at={at}
 ```
 #### Parameters
 * id — record identifier
-* version — record version number
+* version(optional) — record version number
+* at(optional) - record version creation date limit
 #### Responses
 * 200 OK — version found
 * 404 Not Found — record or version does not exist
+* 400 Bad request - both version and at are specified; version < 1; id < 1; version or date is incorrect.
 
 ### Get record version history
 ```http

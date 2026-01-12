@@ -2,7 +2,6 @@ package com.lnnktrn.timetravel_rainbow.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lnnktrn.timetravel_rainbow.dto.RecordVersionDto;
 import com.lnnktrn.timetravel_rainbow.entity.LatestVersionEntity;
 import com.lnnktrn.timetravel_rainbow.entity.RecordEntity;
 import com.lnnktrn.timetravel_rainbow.entity.RecordId;
@@ -11,8 +10,9 @@ import com.lnnktrn.timetravel_rainbow.json.JsonMergePatchUtil;
 import com.lnnktrn.timetravel_rainbow.repository.LatestVersionRepository;
 import com.lnnktrn.timetravel_rainbow.repository.RecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -44,6 +44,13 @@ public class RecordService {
             throw new NoSuchRecordException(id);
         }
         return entities;
+    }
+
+    public RecordEntity getRecordAt(Long id, Instant at) {
+        return recordRepository.findRecordsAt(id, at, PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new NoSuchRecordException(id, at));
     }
 
     public RecordEntity upsertRecord(Long id, JsonNode patch) {
