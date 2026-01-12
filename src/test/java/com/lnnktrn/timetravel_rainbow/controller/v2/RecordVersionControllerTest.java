@@ -185,4 +185,54 @@ class RecordVersionControllerTest {
         verify(recordService).upsertRecord(id, recordUtil.makeJsonNode(body));
         verifyNoMoreInteractions(recordService);
     }
+
+    @Test
+    void getRecord_shouldCallGetRecordAt_whenAtProvided() throws Exception {
+        long id = 1L;
+        long version = 2L;
+        String body = "{\"a\":1}";
+        Instant createdAt = Instant.parse("2025-01-01T00:00:00Z");
+        Instant atParam = Instant.parse("2026-01-01T00:00:00Z");
+        ObjectNode node = recordUtil.makeJsonNode(body);
+
+        RecordEntity entity = recordUtil.makeEntity(id, version, body, createdAt);
+
+        when(recordService.getRecordAt(id, atParam)).thenReturn(entity);
+
+        mockMvc.perform(get("/api/v2/records/{id}", id)
+                        .param("at", atParam.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.data.a").value(1))
+                .andExpect(jsonPath("$.createdAt").value("2025-01-01T00:00:00Z"))
+                .andExpect(jsonPath("$.version").value(2));
+
+
+        verify(recordService).getRecordAt(id, atParam);
+        verify(recordService, never()).getLatestRecord(anyLong());
+        verify(recordService, never()).getRecord(anyLong(), anyLong());
+        verifyNoMoreInteractions(recordService);
+    }
+
+    @Test
+    void getRecord_shouldReturn400_whenBothVersionAndAtProvided() throws Exception {
+        mockMvc.perform(get("/api/v2/records/{id}", 1L)
+                        .param("version", "2")
+                        .param("at", "2025-01-12T10:15:30Z"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(recordService);
+    }
+
+    @Test
+    void getRecord_shouldReturn400_whenAtHasInvalidFormat() throws Exception {
+        // заведомо не ISO.DATE_TIME
+        mockMvc.perform(get("/api/v2/records/{id}", 1L)
+                        .param("at", "yesterday"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(recordService);
+    }
+
 }
