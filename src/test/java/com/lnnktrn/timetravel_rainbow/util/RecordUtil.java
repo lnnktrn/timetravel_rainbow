@@ -13,8 +13,11 @@ import java.time.Instant;
 @Component
 public class RecordUtil {
 
-    @Autowired
     private ObjectMapper objectMapper;
+
+    public RecordUtil(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     public RecordEntity makeEntity(long id, long version, String jsonData, Instant createdAt) {
         var node = makeJsonNode(jsonData);

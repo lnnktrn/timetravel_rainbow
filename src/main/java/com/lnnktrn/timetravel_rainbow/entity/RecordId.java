@@ -12,6 +12,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class RecordId implements Serializable {
     @Column(name = "id", nullable = false)
     private Long id;
