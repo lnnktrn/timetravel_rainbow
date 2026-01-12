@@ -1,7 +1,6 @@
 package com.lnnktrn.timetravel_rainbow.controller.v1;
 
 import com.lnnktrn.timetravel_rainbow.dto.RecordDto;
-import com.lnnktrn.timetravel_rainbow.entity.RecordEntity;
 import com.lnnktrn.timetravel_rainbow.mapper.EntityToDtoMapper;
 import com.lnnktrn.timetravel_rainbow.service.RecordService;
 import jakarta.validation.constraints.Min;
@@ -21,7 +20,7 @@ public class RecordController {
     public ResponseEntity<RecordDto> getRecord(
             @PathVariable @Min(1) Long id
     ) {
-        var entity = recordService.getRecord(id);
+        var entity = recordService.getLatestRecord(id);
         return ResponseEntity.ok(EntityToDtoMapper.map(entity));
     }
 

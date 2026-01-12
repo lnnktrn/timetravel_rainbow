@@ -1,8 +1,7 @@
-package com.lnnktrn.timetravel_rainbow.controller.v1;
+package com.lnnktrn.timetravel_rainbow.controller.v2;
 
 import com.lnnktrn.timetravel_rainbow.entity.RecordEntity;
 import com.lnnktrn.timetravel_rainbow.entity.RecordId;
-import com.lnnktrn.timetravel_rainbow.exception.NoSuchRecordException;
 import com.lnnktrn.timetravel_rainbow.service.RecordService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +14,10 @@ import java.time.Instant;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
-@WebMvcTest(RecordController.class)
-class RecordControllerTest {
+@WebMvcTest(RecordVersionController.class)
+class RecordVersionControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -29,7 +26,7 @@ class RecordControllerTest {
     private RecordService recordService;
 
     @Test
-    void getRecord_shouldReturn200_andBody() throws Exception {
+    void getLatestOrByVersion_shouldCallGetLatest_whenVersionMissing() throws Exception {
         long id = 1L;
         long version = 1L;
         String body = "{\"a\":1}";
@@ -43,7 +40,7 @@ class RecordControllerTest {
 
         when(recordService.getLatestRecord(id)).thenReturn(entity);
 
-        mockMvc.perform(get("/api/v1/records/{id}", id))
+        mockMvc.perform(get("/api/v2/records/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.data").value(body))
@@ -52,46 +49,53 @@ class RecordControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
         verify(recordService).getLatestRecord(id);
+        verify(recordService, never()).getRecord(anyLong(), anyLong());
         verifyNoMoreInteractions(recordService);
     }
 
     @Test
-    void upsertRecord_shouldReturn201_andCallService() throws Exception {
+    void getLatestOrByVersion_shouldCallGetRecord_whenVersionProvided() throws Exception {
         long id = 1L;
+        long version = 2L;
         String body = "{\"a\":1}";
+        Instant createdAt = Instant.parse("2025-01-01T00:00:00Z");
 
-        mockMvc.perform(post("/api/v1/records/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(content().string("")); // Void body
+        RecordEntity entity = RecordEntity.builder()
+                .recordId(RecordId.builder().id(id).version(version).build())
+                .data(body)
+                .createdAt(createdAt)
+                .build();
 
-        verify(recordService).upsertRecord(id, body);
+        when(recordService.getRecord(id, version)).thenReturn(entity);
+
+        mockMvc.perform(get("/api/v2/records/{id}", id)
+                        .param("version", String.valueOf(version)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.data").value(body))
+                .andExpect(jsonPath("$.version").value(version))
+                .andExpect(jsonPath("$.createdAt").value(createdAt.toString()))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+        verify(recordService).getRecord(id, version);
+        verify(recordService, never()).getLatestRecord(anyLong());
         verifyNoMoreInteractions(recordService);
     }
 
     @Test
-    void getRecord_shouldReturn400_whenIdIsZero() throws Exception {
-        mockMvc.perform(get("/api/v1/records/{id}", 0))
+    void getLatestOrByVersion_shouldReturn400_whenIdIsZero_ifMethodValidationEnabled() throws Exception {
+        mockMvc.perform(get("/api/v2/records/{id}", 0L))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(recordService);
     }
 
     @Test
-    void upsertRecord_shouldReturn400_whenIdIsNegative() throws Exception {
-        mockMvc.perform(post("/api/v1/records/{id}", -5)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+    void getLatestOrByVersion_shouldReturn400_whenVersionIsZero_ifMethodValidationEnabled() throws Exception {
+        mockMvc.perform(get("/api/v2/records/{id}", 1L)
+                        .param("version", "0"))
                 .andExpect(status().isBadRequest());
-        verifyNoInteractions(recordService);
-    }
 
-    @Test
-    void get_returns404_whenRecordDoesNotExist() throws Exception {
-        Long id = 1L;
-        when(recordService.getLatestRecord(id)).thenThrow(new NoSuchRecordException(id));
-        mockMvc.perform(get("/api/v1/records/{id}", id))
-                .andExpect(status().isNotFound());
+        verifyNoInteractions(recordService);
     }
 }

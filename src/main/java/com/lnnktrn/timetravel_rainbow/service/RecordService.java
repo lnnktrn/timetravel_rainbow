@@ -17,9 +17,15 @@ public class RecordService {
     @Autowired
     private LatestVersionRepository latestVersionRepository;
 
-    public RecordEntity getRecord(Long id) {
+    public RecordEntity getLatestRecord(Long id) {
         return latestVersionRepository.findLatestRecordById(id)
                 .orElseThrow(() -> new NoSuchRecordException(id));
+    }
+
+    public RecordEntity getRecord(Long id, Long version) {
+        RecordId recordId = RecordId.builder().id(id).version(version).build();
+        return recordRepository.findById(recordId)
+                .orElseThrow(() -> new NoSuchRecordException(id, version));
     }
 
     public void upsertRecord(Long id, String data) {

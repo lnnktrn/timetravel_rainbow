@@ -1,4 +1,4 @@
-package com.lnnktrn.timetravel_rainbow.controller.v1;
+package com.lnnktrn.timetravel_rainbow.controller;
 
 import com.lnnktrn.timetravel_rainbow.exception.NoSuchRecordException;
 import org.springframework.http.HttpStatus;
