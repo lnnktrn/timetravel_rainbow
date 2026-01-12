@@ -15,6 +15,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(RecordVersionController.class)
@@ -147,5 +148,29 @@ class RecordVersionControllerTest {
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(recordService);
+    }
+
+    @Test
+    void upsertRecord_shouldReturn400_whenIdIsNegative() throws Exception {
+        mockMvc.perform(post("/api/v2/records/{id}", -5)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(recordService);
+    }
+
+    @Test
+    void upsertRecord_shouldReturn201_andCallService() throws Exception {
+        long id = 1L;
+        String body = "{\"a\":1}";
+
+        mockMvc.perform(post("/api/v2/records/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(content().string("")); // Void body
+
+        verify(recordService).upsertRecord(id, body);
+        verifyNoMoreInteractions(recordService);
     }
 }
