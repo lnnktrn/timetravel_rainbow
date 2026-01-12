@@ -1,5 +1,6 @@
 package com.lnnktrn.timetravel_rainbow.controller.v2;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.lnnktrn.timetravel_rainbow.entity.RecordEntity;
 import com.lnnktrn.timetravel_rainbow.entity.RecordId;
 import com.lnnktrn.timetravel_rainbow.service.RecordService;
@@ -66,11 +67,7 @@ class RecordVersionControllerTest {
         String body = "{\"a\":1}";
         Instant createdAt = Instant.parse("2025-01-01T00:00:00Z");
 
-        RecordEntity entity = RecordEntity.builder()
-                .recordId(RecordId.builder().id(id).version(version).build())
-                .data(recordUtil.makeJsonNode(body))
-                .createdAt(createdAt)
-                .build();
+        RecordEntity entity = recordUtil.makeEntity(id, version, body, createdAt);
 
         when(recordService.getRecord(id, version)).thenReturn(entity);
 
@@ -166,13 +163,24 @@ class RecordVersionControllerTest {
     @Test
     void upsertRecord_shouldReturn201_andCallService() throws Exception {
         long id = 1L;
+        long version = 2L;
         String body = "{\"a\":1}";
+        Instant createdAt = Instant.parse("2025-01-01T00:00:00Z");
+        ObjectNode node = recordUtil.makeJsonNode(body);
+
+        RecordEntity entity = recordUtil.makeEntity(id, version, body, createdAt);
+
+        when(recordService.upsertRecord(id, node)).thenReturn(entity);
 
         mockMvc.perform(post("/api/v2/records/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
-                .andExpect(content().string("")); // Void body
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.data.a").value(1))
+                .andExpect(jsonPath("$.createdAt").value("2025-01-01T00:00:00Z"))
+                .andExpect(jsonPath("$.version").value(2));
 
         verify(recordService).upsertRecord(id, recordUtil.makeJsonNode(body));
         verifyNoMoreInteractions(recordService);

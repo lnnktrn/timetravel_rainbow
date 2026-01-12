@@ -65,12 +65,13 @@ public class RecordVersionController {
     // Apply updates to the latest version while preserving history
     // POST /api/v2/records/{id}
     @PostMapping("/{id}")
-    public ResponseEntity<Void> upsertRecord(
+    public ResponseEntity<RecordVersionDto> upsertRecord(
             @PathVariable @Min(1) Long id,
             @RequestBody JsonNode data
     ) {
-        recordService.upsertRecord(id, data);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        var entity = recordService.upsertRecord(id, data);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(EntityToDtoMapper.mapRecorEntityToRecorVersionDto(entity));
     }
 
 }
