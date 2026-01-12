@@ -3,10 +3,12 @@ package com.lnnktrn.timetravel_rainbow.controller.v2;
 import com.lnnktrn.timetravel_rainbow.entity.RecordEntity;
 import com.lnnktrn.timetravel_rainbow.entity.RecordId;
 import com.lnnktrn.timetravel_rainbow.service.RecordService;
+import com.lnnktrn.timetravel_rainbow.util.RecordUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -19,11 +21,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(RecordVersionController.class)
+@Import(RecordUtil.class)
 class RecordVersionControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
+    @Autowired
+    private RecordUtil recordUtil;
     @MockBean
     private RecordService recordService;
 
@@ -36,7 +40,7 @@ class RecordVersionControllerTest {
 
         RecordEntity entity = RecordEntity.builder()
                 .recordId(RecordId.builder().id(id).version(version).build())
-                .data(body)
+                .data(recordUtil.makeJsonNode(body))
                 .createdAt(createdAt)
                 .build();
 
@@ -64,7 +68,7 @@ class RecordVersionControllerTest {
 
         RecordEntity entity = RecordEntity.builder()
                 .recordId(RecordId.builder().id(id).version(version).build())
-                .data(body)
+                .data(recordUtil.makeJsonNode(body))
                 .createdAt(createdAt)
                 .build();
 
@@ -107,11 +111,11 @@ class RecordVersionControllerTest {
 
         RecordEntity e1 = RecordEntity.builder().recordId(
                         RecordId.builder().id(id).build())
-                .data("{}")
+                .data(recordUtil.makeJsonNode("{}"))
                 .build();
         RecordEntity e2 = RecordEntity.builder().recordId(
                         RecordId.builder().id(id).build())
-                .data("{}")
+                .data(recordUtil.makeJsonNode("{}"))
                 .build();
 
         when(recordService.listVersions(id)).thenReturn(List.of(e1, e2));
@@ -170,7 +174,7 @@ class RecordVersionControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().string("")); // Void body
 
-        verify(recordService).upsertRecord(id, body);
+        verify(recordService).upsertRecord(id, recordUtil.makeJsonNode(body));
         verifyNoMoreInteractions(recordService);
     }
 }

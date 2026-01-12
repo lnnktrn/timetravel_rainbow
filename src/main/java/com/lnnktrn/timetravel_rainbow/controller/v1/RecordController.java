@@ -1,5 +1,6 @@
 package com.lnnktrn.timetravel_rainbow.controller.v1;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.lnnktrn.timetravel_rainbow.dto.RecordDto;
 import com.lnnktrn.timetravel_rainbow.mapper.EntityToDtoMapper;
 import com.lnnktrn.timetravel_rainbow.service.RecordService;
@@ -41,7 +42,7 @@ public class RecordController {
     @PostMapping("/{id}")
     public ResponseEntity<Void> upsertRecord(
             @PathVariable @Min(1) Long id,
-            @RequestBody String data
+            @RequestBody JsonNode data
     ) {
         recordService.upsertRecord(id, data);
         return ResponseEntity.status(HttpStatus.CREATED).build();

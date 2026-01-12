@@ -1,5 +1,7 @@
 package com.lnnktrn.timetravel_rainbow.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lnnktrn.timetravel_rainbow.entity.LatestVersionEntity;
 import com.lnnktrn.timetravel_rainbow.entity.RecordEntity;
 import com.lnnktrn.timetravel_rainbow.entity.RecordId;
@@ -18,6 +20,8 @@ public class RecordService {
     private RecordRepository recordRepository;
     @Autowired
     private LatestVersionRepository latestVersionRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public RecordEntity getLatestRecord(Long id) {
         return latestVersionRepository.findLatestRecordById(id)
@@ -38,10 +42,11 @@ public class RecordService {
         return entities;
     }
 
-    public void upsertRecord(Long id, String data) {
+    public void upsertRecord(Long id, JsonNode data) {
+        var baseData = objectMapper.createObjectNode();
         RecordEntity existingRecord = recordRepository.findById(RecordId.builder().id(id).build())
                 .orElseGet(() -> RecordEntity.builder()
-                        .recordId(RecordId.builder().id(id).version(1L).build()).data("{}")
+                        .recordId(RecordId.builder().id(id).version(1L).build()).data(baseData)
                         .build());
         existingRecord.setData(data);
         recordRepository.save(existingRecord);
